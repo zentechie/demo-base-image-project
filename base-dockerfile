@@ -1,0 +1,22 @@
+# create the base image from node version 22
+FROM node:22 AS base-image
+
+# set the working directory as app
+WORKDIR /app
+
+# copy package.json and .env & rename them so it won't get replaced in the derived image
+COPY base-image/package.json /app/base-image-package.json
+COPY base-image/.env /app/base-image.env
+COPY base-image/ /app/
+
+# install chrome browser 
+RUN apt-get update \
+    && apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* 
+
+RUN npm install
